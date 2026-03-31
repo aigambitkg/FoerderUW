@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FörderPilot — Fördermittelmanagement für Berater</title>
+<meta name="description" content="Die Plattform für Fördermittelberater: 3.000+ Programme durchsuchen, Anträge vorbereiten, Projekte steuern – alles in einem System.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --slate-950:#020617;--slate-900:#0f172a;--slate-800:#1e293b;--slate-700:#334155;
+  --slate-600:#475569;--slate-500:#64748b;--slate-400:#94a3b8;--slate-300:#cbd5e1;
+  --slate-200:#e2e8f0;--slate-100:#f1f5f9;--slate-50:#f8fafc;--white:#ffffff;
+  --amber-50:#fffbeb;--amber-100:#fef3c7;--amber-200:#fde68a;--amber-300:#fcd34d;
+  --amber-400:#fbbf24;--amber-500:#f59e0b;--amber-600:#d97706;--amber-700:#b45309;
+  --amber-800:#92400e;--amber-900:#78350f;
+  --teal-400:#2dd4bf;--teal-500:#14b8a6;--teal-600:#0d9488;
+  --red-400:#f87171;--red-500:#ef4444;
+  --green-400:#4ade80;--green-500:#22c55e;
+  --font-display:'DM Serif Display',Georgia,serif;
+  --font-body:'DM Sans',system-ui,-apple-system,sans-serif;
+  --ease-out-expo:cubic-bezier(0.16,1,0.3,1);
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--font-body);color:var(--slate-900);background:var(--white);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ===== UTILITY ===== */
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0.3)}50%{box-shadow:0 0 0 12px rgba(245,158,11,0)}}
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity 0.8s var(--ease-out-expo),transform 0.8s var(--ease-out-expo)}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+
+/* ===== NAV ===== */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;transition:all 0.4s var(--ease-out-expo)}
+.nav--top{background:transparent}
+.nav--scrolled{background:rgba(15,23,42,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(148,163,184,0.1)}
+.nav__inner{display:flex;align-items:center;justify-content:space-between;height:72px}
+.nav__logo{font-family:var(--font-display);font-size:1.375rem;color:var(--white);text-decoration:none;display:flex;align-items:center;gap:8px;letter-spacing:-0.01em}
+.nav__logo-mark{width:32px;height:32px;background:var(--amber-500);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-body);font-weight:700;font-size:0.875rem;color:var(--slate-900)}
+.nav__links{display:flex;align-items:center;gap:32px;list-style:none}
+.nav__links a{color:var(--slate-300);text-decoration:none;font-size:0.9rem;font-weight:500;transition:color 0.2s}
+.nav__links a:hover{color:var(--white)}
+.nav__cta{background:var(--amber-500);color:var(--slate-900);font-weight:600;font-size:0.875rem;padding:10px 24px;border-radius:8px;text-decoration:none;transition:all 0.2s;border:none;cursor:pointer}
+.nav__cta:hover{background:var(--amber-400);transform:translateY(-1px)}
+.nav__mobile-toggle{display:none;background:none;border:none;color:var(--white);cursor:pointer;padding:8px}
+
+/* ===== HERO ===== */
+.hero{background:var(--slate-900);min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;padding:120px 0 80px}
+.hero__bg{position:absolute;inset:0;overflow:hidden}
+.hero__grid{position:absolute;inset:0;background-image:linear-gradient(rgba(148,163,184,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,0.05) 1px,transparent 1px);background-size:60px 60px}
+.hero__glow{position:absolute;width:800px;height:800px;border-radius:50%;top:-200px;right:-200px;background:radial-gradient(circle,rgba(245,158,11,0.08) 0%,transparent 70%);pointer-events:none}
+.hero__glow-2{position:absolute;width:600px;height:600px;border-radius:50%;bottom:-100px;left:-100px;background:radial-gradient(circle,rgba(14,184,166,0.06) 0%,transparent 70%);pointer-events:none}
+.hero__content{position:relative;z-index:2;max-width:720px}
+.hero__badge{display:inline-flex;align-items:center;gap:8px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:100px;padding:6px 16px 6px 8px;margin-bottom:28px;animation:fadeUp 0.6s var(--ease-out-expo) both}
+.hero__badge-dot{width:8px;height:8px;border-radius:50%;background:var(--amber-500);animation:pulse-glow 2s ease infinite}
+.hero__badge-text{font-size:0.8rem;font-weight:600;color:var(--amber-400);letter-spacing:0.04em;text-transform:uppercase}
+.hero__title{font-family:var(--font-display);font-size:clamp(2.5rem,5.5vw,4.25rem);line-height:1.08;color:var(--white);margin-bottom:24px;animation:fadeUp 0.6s var(--ease-out-expo) 0.1s both;letter-spacing:-0.02em}
+.hero__title em{font-style:italic;color:var(--amber-400)}
+.hero__subtitle{font-size:clamp(1.05rem,1.8vw,1.25rem);color:var(--slate-400);line-height:1.65;margin-bottom:40px;max-width:580px;animation:fadeUp 0.6s var(--ease-out-expo) 0.2s both;font-weight:400}
+.hero__actions{display:flex;gap:16px;flex-wrap:wrap;animation:fadeUp 0.6s var(--ease-out-expo) 0.3s both}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--amber-500);color:var(--slate-900);font-family:var(--font-body);font-weight:600;font-size:1rem;padding:16px 32px;border-radius:12px;text-decoration:none;transition:all 0.25s var(--ease-out-expo);border:none;cursor:pointer}
+.btn-primary:hover{background:var(--amber-400);transform:translateY(-2px);box-shadow:0 8px 30px rgba(245,158,11,0.25)}
+.btn-secondary{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--slate-300);font-family:var(--font-body);font-weight:500;font-size:1rem;padding:16px 32px;border-radius:12px;text-decoration:none;border:1px solid var(--slate-700);transition:all 0.25s var(--ease-out-expo);cursor:pointer}
+.btn-secondary:hover{border-color:var(--slate-500);color:var(--white);transform:translateY(-2px)}
+.hero__stats{display:flex;gap:48px;margin-top:64px;padding-top:40px;border-top:1px solid rgba(148,163,184,0.1);animation:fadeUp 0.6s var(--ease-out-expo) 0.45s both}
+.hero__stat-num{font-family:var(--font-display);font-size:2rem;color:var(--white);display:block;line-height:1.1}
+.hero__stat-label{font-size:0.8rem;color:var(--slate-500);margin-top:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em}
+
+/* ===== TRUST BAR ===== */
+.trust{background:var(--slate-800);border-top:1px solid rgba(148,163,184,0.08);border-bottom:1px solid rgba(148,163,184,0.08);padding:20px 0}
+.trust__inner{display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap}
+.trust__item{display:flex;align-items:center;gap:8px;color:var(--slate-400);font-size:0.85rem;font-weight:500}
+.trust__icon{width:18px;height:18px;opacity:0.6}
+
+/* ===== FINDER (Förder-Finder Wizard) ===== */
+.finder{padding:100px 0;background:var(--white);position:relative}
+.finder__header{text-align:center;margin-bottom:56px}
+.section-label{display:inline-block;font-size:0.8rem;font-weight:600;color:var(--amber-600);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px}
+.section-title{font-family:var(--font-display);font-size:clamp(1.8rem,3.5vw,2.75rem);color:var(--slate-900);line-height:1.15;letter-spacing:-0.02em}
+.section-subtitle{font-size:1.05rem;color:var(--slate-500);margin-top:16px;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.6}
+.finder__card{background:var(--white);border:1px solid var(--slate-200);border-radius:20px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05),0 20px 50px -12px rgba(0,0,0,0.08);max-width:800px;margin:0 auto;overflow:hidden}
+.finder__progress{display:flex;padding:0;height:3px;background:var(--slate-100)}
+.finder__progress-bar{height:100%;background:var(--amber-500);transition:width 0.5s var(--ease-out-expo);border-radius:0 2px 2px 0}
+.finder__steps{display:flex;padding:20px 28px 0;gap:4px;border-bottom:1px solid var(--slate-100)}
+.finder__step{flex:1;text-align:center;padding:12px 8px;font-size:0.78rem;font-weight:500;color:var(--slate-400);border-bottom:2px solid transparent;transition:all 0.3s;cursor:pointer;position:relative}
+.finder__step.active{color:var(--amber-600);border-bottom-color:var(--amber-500)}
+.finder__step.done{color:var(--teal-600)}
+.finder__step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:0.7rem;font-weight:600;margin-right:6px;background:var(--slate-100);color:var(--slate-500);vertical-align:middle;transition:all 0.3s}
+.finder__step.active .finder__step-num{background:var(--amber-500);color:var(--slate-900)}
+.finder__step.done .finder__step-num{background:var(--teal-500);color:white}
+.finder__body{padding:36px 32px 28px;min-height:320px}
+.finder__slide{display:none}
+.finder__slide.active{display:block;animation:fadeIn 0.3s ease}
+.finder__question{font-family:var(--font-display);font-size:1.35rem;color:var(--slate-900);margin-bottom:8px}
+.finder__hint{font-size:0.88rem;color:var(--slate-500);margin-bottom:24px}
+.finder__options{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.finder__option{display:flex;align-items:center;gap:10px;padding:14px 18px;border:1.5px solid var(--slate-200);border-radius:12px;cursor:pointer;transition:all 0.2s;background:var(--white);font-size:0.9rem;font-weight:500;color:var(--slate-700)}
+.finder__option:hover{border-color:var(--amber-300);background:var(--amber-50)}
+.finder__option.selected{border-color:var(--amber-500);background:var(--amber-50);color:var(--amber-800)}
+.finder__option-icon{font-size:1.2rem;width:28px;text-align:center;flex-shrink:0}
+.finder__input-row{display:flex;gap:12px;margin-bottom:16px}
+.finder__input{flex:1;padding:14px 18px;border:1.5px solid var(--slate-200);border-radius:12px;font-family:var(--font-body);font-size:0.95rem;color:var(--slate-900);outline:none;transition:border-color 0.2s;background:var(--white)}
+.finder__input:focus{border-color:var(--amber-500)}
+.finder__input::placeholder{color:var(--slate-400)}
+select.finder__input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748b'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px}
+.finder__footer{display:flex;justify-content:space-between;padding:0 32px 28px;gap:12px}
+.finder__btn{padding:12px 28px;border-radius:10px;font-family:var(--font-body);font-weight:600;font-size:0.9rem;cursor:pointer;transition:all 0.2s;border:none}
+.finder__btn--back{background:var(--slate-100);color:var(--slate-600)}
+.finder__btn--back:hover{background:var(--slate-200)}
+.finder__btn--next{background:var(--amber-500);color:var(--slate-900)}
+.finder__btn--next:hover{background:var(--amber-400);transform:translateY(-1px)}
+.finder__btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+
+/* Results */
+.finder__results{text-align:center}
+.finder__results-title{font-family:var(--font-display);font-size:1.5rem;color:var(--slate-900);margin-bottom:8px}
+.finder__results-sub{color:var(--slate-500);font-size:0.95rem;margin-bottom:28px}
+.finder__result-card{text-align:left;padding:20px;border:1.5px solid var(--slate-200);border-radius:14px;margin-bottom:12px;transition:all 0.2s;background:var(--white)}
+.finder__result-card:hover{border-color:var(--amber-300);box-shadow:0 4px 20px rgba(0,0,0,0.06)}
+.finder__result-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}
+.finder__result-name{font-weight:600;font-size:1rem;color:var(--slate-900)}
+.finder__result-badge{font-size:0.75rem;font-weight:600;padding:4px 10px;border-radius:6px;white-space:nowrap}
+.finder__result-badge--high{background:rgba(34,197,94,0.1);color:var(--green-500)}
+.finder__result-badge--mid{background:rgba(245,158,11,0.1);color:var(--amber-600)}
+.finder__result-meta{display:flex;gap:20px;font-size:0.82rem;color:var(--slate-500);margin-top:8px}
+.finder__result-meta span{display:flex;align-items:center;gap:4px}
+.finder__result-desc{font-size:0.88rem;color:var(--slate-600);line-height:1.55}
+
+/* ===== PHASES ===== */
+.phases{padding:100px 0;background:var(--slate-50)}
+.phases__header{text-align:center;margin-bottom:64px}
+.phases__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--slate-200);border-radius:20px;overflow:hidden;max-width:1000px;margin:0 auto}
+.phase-card{background:var(--white);padding:36px 28px;position:relative;transition:all 0.3s}
+.phase-card:hover{background:var(--slate-50)}
+.phase-card__num{font-family:var(--font-display);font-size:2.5rem;color:var(--slate-100);position:absolute;top:16px;right:20px;line-height:1;transition:color 0.3s}
+.phase-card:hover .phase-card__num{color:var(--amber-100)}
+.phase-card__icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:1.1rem}
+.phase-card__icon--1{background:rgba(59,130,246,0.1);color:#3b82f6}
+.phase-card__icon--2{background:rgba(139,92,246,0.1);color:#8b5cf6}
+.phase-card__icon--3{background:rgba(14,184,166,0.1);color:#0ea5a9}
+.phase-card__icon--4{background:rgba(245,158,11,0.1);color:#d97706}
+.phase-card__icon--5{background:rgba(239,68,68,0.1);color:#ef4444}
+.phase-card__icon--6{background:rgba(34,197,94,0.1);color:#22c55e}
+.phase-card__title{font-family:var(--font-display);font-size:1.15rem;color:var(--slate-900);margin-bottom:8px}
+.phase-card__desc{font-size:0.85rem;color:var(--slate-500);line-height:1.55}
+.phase-card__items{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
+.phase-card__tag{font-size:0.72rem;font-weight:500;padding:3px 10px;border-radius:100px;background:var(--slate-100);color:var(--slate-600)}
+
+/* ===== FEATURES ===== */
+.features{padding:100px 0;background:var(--white)}
+.features__header{text-align:center;margin-bottom:64px}
+.features__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.feature-card{padding:36px 28px;border-radius:20px;border:1px solid var(--slate-200);transition:all 0.3s;position:relative;overflow:hidden}
+.feature-card:hover{border-color:var(--slate-300);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.06)}
+.feature-card__icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:1.3rem}
+.feature-card:nth-child(1) .feature-card__icon{background:linear-gradient(135deg,var(--amber-100),var(--amber-200));color:var(--amber-700)}
+.feature-card:nth-child(2) .feature-card__icon{background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:#1d4ed8}
+.feature-card:nth-child(3) .feature-card__icon{background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:#047857}
+.feature-card__title{font-family:var(--font-display);font-size:1.2rem;color:var(--slate-900);margin-bottom:10px}
+.feature-card__desc{font-size:0.9rem;color:var(--slate-500);line-height:1.6}
+.feature-card__list{margin-top:16px;list-style:none}
+.feature-card__list li{padding:6px 0;font-size:0.85rem;color:var(--slate-600);display:flex;align-items:flex-start;gap:8px}
+.feature-card__list li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--amber-500);margin-top:7px;flex-shrink:0}
+
+/* ===== BERATER SECTION ===== */
+.berater{padding:100px 0;background:var(--slate-900);color:var(--white);position:relative;overflow:hidden}
+.berater__glow{position:absolute;width:600px;height:600px;border-radius:50%;top:-200px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(245,158,11,0.06) 0%,transparent 70%);pointer-events:none}
+.berater__header{text-align:center;margin-bottom:56px;position:relative;z-index:2}
+.berater__header .section-label{color:var(--amber-400)}
+.berater__header .section-title{color:var(--white)}
+.berater__header .section-subtitle{color:var(--slate-400)}
+.berater__grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;position:relative;z-index:2}
+.berater-card{padding:28px;border-radius:16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);transition:all 0.3s}
+.berater-card:hover{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.1)}
+.berater-card__title{font-weight:600;font-size:1rem;color:var(--white);margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.berater-card__title span{font-size:1.2rem}
+.berater-card__desc{font-size:0.88rem;color:var(--slate-400);line-height:1.6}
+
+/* ===== COMPLIANCE ===== */
+.compliance{padding:80px 0;background:var(--slate-800);border-top:1px solid rgba(148,163,184,0.08)}
+.compliance__inner{display:flex;align-items:center;gap:48px;flex-wrap:wrap}
+.compliance__text{flex:1;min-width:300px}
+.compliance__text .section-label{color:var(--teal-400)}
+.compliance__text .section-title{color:var(--white);font-size:clamp(1.5rem,2.5vw,2rem)}
+.compliance__text p{color:var(--slate-400);margin-top:16px;font-size:0.95rem;line-height:1.6}
+.compliance__badges{flex:1;min-width:300px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.compliance-badge{padding:18px 20px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)}
+.compliance-badge__label{font-size:0.78rem;font-weight:500;color:var(--slate-500);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em}
+.compliance-badge__value{font-weight:600;color:var(--white);font-size:0.95rem}
+
+/* ===== CTA ===== */
+.cta{padding:100px 0;background:var(--white);text-align:center}
+.cta__card{background:var(--slate-900);border-radius:24px;padding:72px 48px;position:relative;overflow:hidden;max-width:900px;margin:0 auto}
+.cta__card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top right,rgba(245,158,11,0.12) 0%,transparent 60%);pointer-events:none}
+.cta__title{font-family:var(--font-display);font-size:clamp(1.8rem,3.5vw,2.5rem);color:var(--white);margin-bottom:16px;position:relative;z-index:2;letter-spacing:-0.01em}
+.cta__subtitle{font-size:1.05rem;color:var(--slate-400);margin-bottom:36px;position:relative;z-index:2;max-width:500px;margin-left:auto;margin-right:auto}
+.cta__actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;z-index:2}
+
+/* ===== FOOTER ===== */
+.footer{padding:48px 0;background:var(--slate-50);border-top:1px solid var(--slate-200)}
+.footer__inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer__logo{font-family:var(--font-display);font-size:1.1rem;color:var(--slate-900);display:flex;align-items:center;gap:8px}
+.footer__logo-mark{width:24px;height:24px;background:var(--amber-500);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--font-body);font-weight:700;font-size:0.65rem;color:var(--slate-900)}
+.footer__links{display:flex;gap:28px;list-style:none}
+.footer__links a{color:var(--slate-500);text-decoration:none;font-size:0.85rem;transition:color 0.2s}
+.footer__links a:hover{color:var(--slate-900)}
+.footer__copy{color:var(--slate-400);font-size:0.8rem}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  .nav__links{display:none}
+  .nav__mobile-toggle{display:block}
+  .hero__stats{flex-direction:column;gap:20px}
+  .phases__grid{grid-template-columns:1fr}
+  .features__grid{grid-template-columns:1fr}
+  .berater__grid{grid-template-columns:1fr}
+  .compliance__inner{flex-direction:column}
+  .finder__options{grid-template-columns:1fr}
+  .finder__steps{overflow-x:auto;flex-wrap:nowrap}
+  .finder__step{white-space:nowrap;font-size:0.72rem}
+  .finder__input-row{flex-direction:column}
+  .hero{padding:100px 0 60px}
+}
+@media(max-width:480px){
+  .hero__actions{flex-direction:column}
+  .btn-primary,.btn-secondary{width:100%;justify-content:center}
+  .finder__body{padding:24px 20px 20px}
+  .finder__footer{padding:0 20px 20px}
+  .compliance__badges{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== NAVIGATION ===== -->
+<nav class="nav nav--top" id="nav">
+  <div class="container nav__inner">
+    <a href="#" class="nav__logo">
+      <span class="nav__logo-mark">FP</span>
+      FörderPilot
+    </a>
+    <ul class="nav__links">
+      <li><a href="#finder">Förder-Finder</a></li>
+      <li><a href="#phases">Ablauf</a></li>
+      <li><a href="#features">Funktionen</a></li>
+      <li><a href="#berater">Für Berater</a></li>
+    </ul>
+    <a href="#finder" class="nav__cta">Kostenlos testen</a>
+    <button class="nav__mobile-toggle" onclick="this.closest('.nav__inner').querySelector('.nav__links').classList.toggle('show')" aria-label="Menü öffnen">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero__bg">
+    <div class="hero__grid"></div>
+    <div class="hero__glow"></div>
+    <div class="hero__glow-2"></div>
+  </div>
+  <div class="container">
+    <div class="hero__content">
+      <div class="hero__badge">
+        <span class="hero__badge-dot"></span>
+        <span class="hero__badge-text">Jetzt in der Beta</span>
+      </div>
+      <h1 class="hero__title">Fördermittel<br><em>ohne Kopfschmerzen.</em></h1>
+      <p class="hero__subtitle">Die Plattform für Fördermittelberater: Von der Programmrecherche über den Antrag bis zum Verwendungsnachweis – alle 6 Phasen in einem System. Für Ihre Mandanten, nicht gegen Sie.</p>
+      <div class="hero__actions">
+        <a href="#finder" class="btn-primary">
+          Förder-Finder starten
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+        <a href="#phases" class="btn-secondary">So funktioniert's</a>
+      </div>
+      <div class="hero__stats">
+        <div>
+          <span class="hero__stat-num">3.000+</span>
+          <span class="hero__stat-label">Förderprogramme</span>
+        </div>
+        <div>
+          <span class="hero__stat-num">6</span>
+          <span class="hero__stat-label">Phasen abgedeckt</span>
+        </div>
+        <div>
+          <span class="hero__stat-num">100%</span>
+          <span class="hero__stat-label">DSGVO-konform</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TRUST BAR ===== -->
+<div class="trust">
+  <div class="container trust__inner">
+    <div class="trust__item">
+      <svg class="trust__icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622A11.99 11.99 0 0018.402 6a11.959 11.959 0 00-6.402-2.286z"/></svg>
+      Revisionssicher
+    </div>
+    <div class="trust__item">
+      <svg class="trust__icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Alle Fristen im Blick
+    </div>
+    <div class="trust__item">
+      <svg class="trust__icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+      DSGVO &amp; AGVO konform
+    </div>
+    <div class="trust__item">
+      <svg class="trust__icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+      Multi-Mandanten-fähig
+    </div>
+  </div>
+</div>
+
+<!-- ===== FÖRDER-FINDER ===== -->
+<section class="finder" id="finder">
+  <div class="container">
+    <div class="finder__header fade-up">
+      <span class="section-label">Förder-Finder</span>
+      <h2 class="section-title">In 60 Sekunden zum passenden Programm</h2>
+      <p class="section-subtitle">Beantworten Sie vier kurze Fragen und erhalten Sie eine priorisierte Liste passender Förderprogramme für Ihren Mandanten.</p>
+    </div>
+    <div class="finder__card fade-up">
+      <div class="finder__progress"><div class="finder__progress-bar" id="progressBar" style="width:25%"></div></div>
+      <div class="finder__steps" id="steps"></div>
+      <div class="finder__body" id="finderBody"></div>
+      <div class="finder__footer">
+        <button class="finder__btn finder__btn--back" id="btnBack" onclick="prevStep()" disabled>Zurück</button>
+        <button class="finder__btn finder__btn--next" id="btnNext" onclick="nextStep()">Weiter</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PHASEN ===== -->
+<section class="phases" id="phases">
+  <div class="container">
+    <div class="phases__header fade-up">
+      <span class="section-label">Der Prozess</span>
+      <h2 class="section-title">6 Phasen, ein System</h2>
+      <p class="section-subtitle">Von der ersten Idee bis zum letzten Verwendungsnachweis – FörderPilot deckt den gesamten Fördermittel-Lebenszyklus ab.</p>
+    </div>
+    <div class="phases__grid fade-up">
+      <div class="phase-card">
+        <span class="phase-card__num">01</span>
+        <div class="phase-card__icon phase-card__icon--1">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+        </div>
+        <h3 class="phase-card__title">Orientierung</h3>
+        <p class="phase-card__desc">Passende Programme aus 3.000+ Optionen finden. KMU-Status prüfen, Förderquoten vergleichen.</p>
+        <div class="phase-card__items">
+          <span class="phase-card__tag">Förder-Finder</span>
+          <span class="phase-card__tag">KMU-Check</span>
+        </div>
+      </div>
+      <div class="phase-card">
+        <span class="phase-card__num">02</span>
+        <div class="phase-card__icon phase-card__icon--2">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+        </div>
+        <h3 class="phase-card__title">Vorbereitung</h3>
+        <p class="phase-card__desc">Geführte Kalkulation, Dokumenten-Checkliste, automatisierte KMU-Erklärung.</p>
+        <div class="phase-card__items">
+          <span class="phase-card__tag">Kostenkalkulator</span>
+          <span class="phase-card__tag">De-minimis</span>
+        </div>
+      </div>
+      <div class="phase-card">
+        <span class="phase-card__num">03</span>
+        <div class="phase-card__icon phase-card__icon--3">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
+        </div>
+        <h3 class="phase-card__title">Antragstellung</h3>
+        <p class="phase-card__desc">Validierung, Portal-Export, QES-Signatur – alles aus einer Oberfläche.</p>
+        <div class="phase-card__items">
+          <span class="phase-card__tag">easy-Online</span>
+          <span class="phase-card__tag">QES</span>
+        </div>
+      </div>
+      <div class="phase-card">
+        <span class="phase-card__num">04</span>
+        <div class="phase-card__icon phase-card__icon--4">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h3 class="phase-card__title">Bewilligung</h3>
+        <p class="phase-card__desc">Status-Tracking, Rückfragen-Management, Bescheid-Import mit Datumsvalidierung.</p>
+        <div class="phase-card__items">
+          <span class="phase-card__tag">Status-Tracker</span>
+          <span class="phase-card__tag">Bescheid</span>
+        </div>
+      </div>
+      <div class="phase-card">
+        <span class="phase-card__num">05</span>
+        <div class="phase-card__icon phase-card__icon--5">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+        </div>
+        <h3 class="phase-card__title">Controlling</h3>
+        <p class="phase-card__desc">Zeiterfassung, Kostenstellen, Vergabedokumentation, automatisierter Mittelabruf.</p>
+        <div class="phase-card__items">
+          <span class="phase-card__tag">Zeiterfassung</span>
+          <span class="phase-card__tag">Mittelabruf</span>
+        </div>
+      </div>
+      <div class="phase-card">
+        <span class="phase-card__num">06</span>
+        <div class="phase-card__icon phase-card__icon--6">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
+        </div>
+        <h3 class="phase-card__title">Abschluss</h3>
+        <p class="phase-card__desc">Verwendungsnachweis, Prüfer-Portal, 10-Jahres-Archivierung – revisionssicher.</p>
+        <div class="phase-card__items">
+          <span class="phase-card__tag">Nachweis</span>
+          <span class="phase-card__tag">Archiv</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="features__header fade-up">
+      <span class="section-label">Warum FörderPilot</span>
+      <h2 class="section-title">Drei Probleme, eine Lösung</h2>
+    </div>
+    <div class="features__grid fade-up">
+      <div class="feature-card">
+        <div class="feature-card__icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802"/></svg>
+        </div>
+        <h3 class="feature-card__title">Sprachbarrieren beseitigt</h3>
+        <p class="feature-card__desc">Behördendeutsch wird zu verständlichen Formularen. Jeder Fachbegriff erklärt, jedes Feld mit Kontext versehen.</p>
+        <ul class="feature-card__list">
+          <li>Tooltips für ANBest-P, AGVO, BHO</li>
+          <li>Formulare in einfacher Sprache</li>
+          <li>Mehrsprachig vorbereitet (DE/EN/TR)</li>
+          <li>Mandanten können selbst ausfüllen</li>
+        </ul>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622A11.99 11.99 0 0018.402 6a11.959 11.959 0 00-6.402-2.286zM12 15.75h.008v.008H12v-.008z"/></svg>
+        </div>
+        <h3 class="feature-card__title">Compliance-Fallen vermieden</h3>
+        <p class="feature-card__desc">Automatische Prüfungen verhindern teure Fehler – bevor sie passieren, nicht danach.</p>
+        <ul class="feature-card__list">
+          <li>De-minimis-Kumulierungsprüfung</li>
+          <li>Vorzeitiger Maßnahmebeginn blockiert</li>
+          <li>Vergaberecht-Schwellen geprüft</li>
+          <li>AGVO-Förderquoten validiert</li>
+        </ul>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605"/></svg>
+        </div>
+        <h3 class="feature-card__title">Stunden zurückgewonnen</h3>
+        <p class="feature-card__desc">Automatisierte Kalkulationen, vorausgefüllte Formulare und generierte Nachweise sparen Tage pro Antrag.</p>
+        <ul class="feature-card__list">
+          <li>Stundensatz aus Jahreslohn berechnet</li>
+          <li>Abschreibungslogik automatisiert</li>
+          <li>Verwendungsnachweis auf Knopfdruck</li>
+          <li>Vorlagen mandantenübergreifend</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FÜR BERATER ===== -->
+<section class="berater" id="berater">
+  <div class="berater__glow"></div>
+  <div class="container">
+    <div class="berater__header fade-up">
+      <span class="section-label">Speziell für Berater</span>
+      <h2 class="section-title">Ihr gesamtes Portfolio im Griff</h2>
+      <p class="section-subtitle">Gebaut von Beratern, für Berater. Jede Funktion optimiert auf den Alltag mit mehreren Mandanten.</p>
+    </div>
+    <div class="berater__grid fade-up">
+      <div class="berater-card">
+        <div class="berater-card__title"><span>&#9783;</span> Multi-Mandanten-Dashboard</div>
+        <p class="berater-card__desc">Alle Mandanten auf einen Blick: Ampelsystem für Fristen, Phasen-Fortschritt, offene Aufgaben. Gruppierung nach Programm, Phase oder Dringlichkeit.</p>
+      </div>
+      <div class="berater-card">
+        <div class="berater-card__title"><span>&#10140;</span> Delegations-Workflows</div>
+        <p class="berater-card__desc">Mandanten per E-Mail einladen, fehlende Dokumente hochzuladen – ohne Zugriff auf andere Daten. Automatische Erinnerungen bei ausstehenden Uploads.</p>
+      </div>
+      <div class="berater-card">
+        <div class="berater-card__title"><span>&#9874;</span> Vorlagen-Bibliothek</div>
+        <p class="berater-card__desc">Projektbeschreibungen, Kalkulationsvorlagen und Checklisten als Berater-eigene Templates speichern und mandantenübergreifend wiederverwenden.</p>
+      </div>
+      <div class="berater-card">
+        <div class="berater-card__title"><span>&#9881;</span> Batch-Operationen</div>
+        <p class="berater-card__desc">De-minimis-Prüfung über mehrere Mandanten, Sammel-Fristübersicht, Portfolio-Export für Ihre eigene Abrechnung und Berichterstattung.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== COMPLIANCE BAR ===== -->
+<section class="compliance">
+  <div class="container compliance__inner fade-up">
+    <div class="compliance__text">
+      <span class="section-label">Sicherheit &amp; Compliance</span>
+      <h2 class="section-title">Gebaut für Wirtschaftsprüfer</h2>
+      <p>Jede Änderung wird protokolliert. Jedes Dokument verschlüsselt gespeichert. Jede Frist überwacht. Damit Sie bei der Prüfung ruhig schlafen können.</p>
+    </div>
+    <div class="compliance__badges">
+      <div class="compliance-badge">
+        <div class="compliance-badge__label">Audit-Trail</div>
+        <div class="compliance-badge__value">Unveränderlich, lückenlos</div>
+      </div>
+      <div class="compliance-badge">
+        <div class="compliance-badge__label">Verschlüsselung</div>
+        <div class="compliance-badge__value">AES-256, at rest &amp; in transit</div>
+      </div>
+      <div class="compliance-badge">
+        <div class="compliance-badge__label">Aufbewahrung</div>
+        <div class="compliance-badge__value">10+ Jahre, automatisiert</div>
+      </div>
+      <div class="compliance-badge">
+        <div class="compliance-badge__label">Rollentrennung</div>
+        <div class="compliance-badge__value">RBAC mit 4 Rollen</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FINAL CTA ===== -->
+<section class="cta">
+  <div class="container">
+    <div class="cta__card fade-up">
+      <h2 class="cta__title">Bereit, den Förderprozess<br>neu zu denken?</h2>
+      <p class="cta__subtitle">Starten Sie kostenlos mit dem Förder-Finder. Kein Vertrag, kein Risiko, keine Kreditkarte.</p>
+      <div class="cta__actions">
+        <a href="#finder" class="btn-primary">
+          Jetzt starten
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+        <a href="#" class="btn-secondary" style="border-color:rgba(255,255,255,0.15);color:var(--slate-300)">Demo vereinbaren</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__logo">
+      <span class="footer__logo-mark">FP</span>
+      FörderPilot
+    </div>
+    <ul class="footer__links">
+      <li><a href="#">Datenschutz</a></li>
+      <li><a href="#">Impressum</a></li>
+      <li><a href="#">AGB</a></li>
+      <li><a href="#">Kontakt</a></li>
+    </ul>
+    <span class="footer__copy">&copy; 2026 FörderPilot GmbH</span>
+  </div>
+</footer>
+
+<script>
+/* ===== SCROLL NAV ===== */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('nav--scrolled', window.scrollY > 40);
+  nav.classList.toggle('nav--top', window.scrollY <= 40);
+});
+
+/* ===== SCROLL REVEAL ===== */
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }});
+}, { threshold: 0.15 });
+document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
+/* ===== FÖRDER-FINDER WIZARD ===== */
+const wizardData = [
+  {
+    title: 'Was beschreibt Ihr Vorhaben am besten?',
+    hint: 'Wählen Sie die Kategorie, die am nächsten passt.',
+    type: 'options',
+    key: 'vorhaben',
+    options: [
+      { icon: '&#128187;', label: 'Digitalisierung' },
+      { icon: '&#128300;', label: 'Forschung & Entwicklung' },
+      { icon: '&#9889;', label: 'Energie & Nachhaltigkeit' },
+      { icon: '&#127758;', label: 'Internationalisierung' },
+      { icon: '&#128188;', label: 'Gründung & Wachstum' },
+      { icon: '&#127979;', label: 'Weiterbildung' }
+    ]
+  },
+  {
+    title: 'Wo sitzt das Unternehmen?',
+    hint: 'Bundesland und ungefähre Unternehmensgröße.',
+    type: 'inputs',
+    key: 'standort',
+    fields: [
+      { id: 'bundesland', label: 'Bundesland', type: 'select', options: ['Baden-Württemberg','Bayern','Berlin','Brandenburg','Bremen','Hamburg','Hessen','Mecklenburg-Vorpommern','Niedersachsen','Nordrhein-Westfalen','Rheinland-Pfalz','Saarland','Sachsen','Sachsen-Anhalt','Schleswig-Holstein','Thüringen'] },
+      { id: 'mitarbeiter', label: 'Mitarbeiterzahl', type: 'select', options: ['1-9','10-49','50-249','250+'] }
+    ]
+  },
+  {
+    title: 'Wie hoch ist das geplante Projektbudget?',
+    hint: 'Grobe Schätzung genügt – wir berechnen die mögliche Förderung.',
+    type: 'inputs',
+    key: 'budget',
+    fields: [
+      { id: 'budget', label: 'Budget in EUR', type: 'text', placeholder: 'z. B. 150.000' },
+      { id: 'laufzeit', label: 'Geplante Laufzeit', type: 'select', options: ['6 Monate','12 Monate','18 Monate','24 Monate','36 Monate'] }
+    ]
+  },
+  {
+    title: 'Gab es bereits Förderungen?',
+    hint: 'Wichtig für die De-minimis-Kumulierungsprüfung (300.000 EUR / 3 Jahre).',
+    type: 'options',
+    key: 'vorfoerderung',
+    options: [
+      { icon: '&#10060;', label: 'Keine bisherigen' },
+      { icon: '&#128178;', label: 'Ja, unter 100.000 EUR' },
+      { icon: '&#128176;', label: 'Ja, 100.000 - 250.000 EUR' },
+      { icon: '&#9888;', label: 'Ja, über 250.000 EUR' },
+      { icon: '&#10067;', label: 'Unsicher / muss geprüft werden' }
+    ]
+  }
+];
+
+const stepNames = ['Vorhaben', 'Standort', 'Budget', 'Förderhistorie'];
+let currentStep = 0;
+const answers = {};
+
+function renderSteps() {
+  const c = document.getElementById('steps');
+  c.innerHTML = stepNames.map((name, i) => {
+    const cls = i === currentStep ? 'active' : (i < currentStep ? 'done' : '');
+    const numContent = i < currentStep ? '&#10003;' : (i + 1);
+    return `<div class="finder__step ${cls}"><span class="finder__step-num">${numContent}</span>${name}</div>`;
+  }).join('');
+}
+
+function renderSlide() {
+  const step = wizardData[currentStep];
+  const body = document.getElementById('finderBody');
+  
+  if (currentStep >= wizardData.length) {
+    renderResults();
+    return;
+  }
+
+  let html = `<div class="finder__slide active">
+    <h3 class="finder__question">${step.title}</h3>
+    <p class="finder__hint">${step.hint}</p>`;
+
+  if (step.type === 'options') {
+    html += '<div class="finder__options">';
+    step.options.forEach(opt => {
+      const sel = answers[step.key] === opt.label ? 'selected' : '';
+      html += `<div class="finder__option ${sel}" onclick="selectOption(this,'${step.key}','${opt.label}')">
+        <span class="finder__option-icon">${opt.icon}</span>${opt.label}
+      </div>`;
+    });
+    html += '</div>';
+  } else if (step.type === 'inputs') {
+    step.fields.forEach(f => {
+      html += '<div class="finder__input-row">';
+      if (f.type === 'select') {
+        const saved = answers[f.id] || '';
+        html += `<select class="finder__input" id="${f.id}" onchange="saveInput('${f.id}',this.value)">
+          <option value="" disabled ${!saved ? 'selected' : ''}>${f.label}</option>
+          ${f.options.map(o => `<option value="${o}" ${saved === o ? 'selected' : ''}>${o}</option>`).join('')}
+        </select>`;
+      } else {
+        const saved = answers[f.id] || '';
+        html += `<input class="finder__input" type="text" id="${f.id}" placeholder="${f.placeholder || f.label}" value="${saved}" oninput="saveInput('${f.id}',this.value)">`;
+      }
+      html += '</div>';
+    });
+  }
+  html += '</div>';
+  body.innerHTML = html;
+
+  document.getElementById('progressBar').style.width = ((currentStep + 1) / (wizardData.length + 1) * 100) + '%';
+  document.getElementById('btnBack').disabled = currentStep === 0;
+  document.getElementById('btnNext').textContent = currentStep === wizardData.length - 1 ? 'Programme finden' : 'Weiter';
+  document.getElementById('btnNext').style.display = '';
+  document.getElementById('btnBack').style.display = '';
+  renderSteps();
+}
+
+function selectOption(el, key, value) {
+  answers[key] = value;
+  el.closest('.finder__options').querySelectorAll('.finder__option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function saveInput(id, value) { answers[id] = value; }
+
+function nextStep() {
+  if (currentStep < wizardData.length - 1) { currentStep++; renderSlide(); }
+  else { currentStep = wizardData.length; renderResults(); }
+}
+
+function prevStep() {
+  if (currentStep > 0) { currentStep--; renderSlide(); }
+}
+
+function renderResults() {
+  const body = document.getElementById('finderBody');
+  document.getElementById('progressBar').style.width = '100%';
+  document.getElementById('btnNext').style.display = 'none';
+  document.getElementById('btnBack').style.display = 'none';
+  renderSteps();
+
+  const programs = [
+    { name: 'go-digital', desc: 'BMWi-Programm für Digitalisierungsprojekte in KMU. Bis zu 50% Förderquote für autorisierte Beratungsunternehmen.', rate: 'Bis 50%', max: '16.500 EUR', match: 'Sehr hoch', framework: 'De-minimis' },
+    { name: 'Digital Jetzt', desc: 'Investitionszuschuss für KMU zur Digitalisierung von Geschäftsprozessen und Qualifizierung von Mitarbeitenden.', rate: 'Bis 40%', max: '50.000 EUR', match: 'Hoch', framework: 'De-minimis' },
+    { name: 'ZIM Einzelprojekt', desc: 'Zentrales Innovationsprogramm Mittelstand – Förderung technologischer Innovationen für KMU.', rate: 'Bis 45%', max: '380.000 EUR', match: 'Hoch', framework: 'AGVO' },
+    { name: 'KfW ERP-Digitalisierungskredit', desc: 'Zinsgünstiges Darlehen für Digitalisierungsvorhaben. Kombination mit Zuschüssen möglich.', rate: 'Zinsverbilligung', max: '25 Mio. EUR', match: 'Mittel', framework: 'Beihilfefrei' },
+  ];
+
+  let html = `<div class="finder__results">
+    <h3 class="finder__results-title">4 passende Programme gefunden</h3>
+    <p class="finder__results-sub">Basierend auf: ${answers.vorhaben || 'Digitalisierung'} · ${answers.bundesland || 'Hamburg'} · ${answers.mitarbeiter || '10-49'} MA</p>`;
+
+  programs.forEach(p => {
+    const badgeCls = p.match === 'Sehr hoch' ? 'finder__result-badge--high' : (p.match === 'Hoch' ? 'finder__result-badge--high' : 'finder__result-badge--mid');
+    html += `<div class="finder__result-card">
+      <div class="finder__result-header">
+        <div>
+          <div class="finder__result-name">${p.name}</div>
+          <p class="finder__result-desc">${p.desc}</p>
+        </div>
+        <span class="finder__result-badge ${badgeCls}">${p.match}</span>
+      </div>
+      <div class="finder__result-meta">
+        <span>Förderquote: <strong>${p.rate}</strong></span>
+        <span>Max: <strong>${p.max}</strong></span>
+        <span>Rahmen: <strong>${p.framework}</strong></span>
+      </div>
+    </div>`;
+  });
+
+  html += `<div style="margin-top:24px">
+    <a href="#" class="btn-primary" style="display:inline-flex">Antrag für Mandant starten <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a>
+    <p style="margin-top:12px;font-size:0.82rem;color:var(--slate-500)">Kostenlos registrieren und direkt mit der Antragsvorbereitung beginnen.</p>
+  </div></div>`;
+
+  body.innerHTML = html;
+}
+
+renderSlide();
+</script>
+</body>
+</html>
